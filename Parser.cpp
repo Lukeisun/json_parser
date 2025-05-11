@@ -3,6 +3,19 @@
 #include <cstddef>
 #include <string_view>
 #include <variant>
+
+void Value::print(int indent) {
+  fmt::print("%{}\t", indent);
+  std::visit(overloads{
+                 [](float v) { fmt::print("{}", v); },
+                 [](std::string_view v) {},
+                 [](std::vector<Value> v) {},
+                 [](bool v) {},
+                 [](std::nullptr_t v) {},
+                 [](Error v) {},
+             },
+             this->val);
+}
 Value Parser::parse() { return this->elements(); }
 Value Parser::elements() {
   fmt::println("B {}", this->peek().to_string());

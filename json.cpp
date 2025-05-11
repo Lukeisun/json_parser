@@ -45,6 +45,7 @@ public:
     }
     Parser parser(this->tokens, this->content);
     auto v = parser.parse();
+    v.print();
   }
 };
 

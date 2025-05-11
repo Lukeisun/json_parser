@@ -4,6 +4,10 @@
 #include <variant>
 struct Error {};
 
+template <class... Ts> struct overloads : Ts... {
+  using Ts::operator()...;
+};
+
 class Value {
 public:
   typedef std::variant<float, std::string_view, std::vector<Value>, bool,
@@ -12,6 +16,7 @@ public:
 
   value_t val;
   Value(value_t val) : val(val) {}
+  void print(int indent = 0);
 };
 
 class Parser {
