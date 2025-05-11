@@ -1,0 +1,38 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "--std=c++23",
+      "-g",
+      "-fsanitize=address",
+      "json.cpp"
+    ],
+    "directory": "/home/lukeisun/Projects/json",
+    "file": "/home/lukeisun/Projects/json/json.cpp"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "--std=c++23",
+      "-g",
+      "-fsanitize=address",
+      "Lexer.cpp"
+    ],
+    "directory": "/home/lukeisun/Projects/json",
+    "file": "/home/lukeisun/Projects/json/Lexer.cpp"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "--std=c++23",
+      "-g",
+      "-fsanitize=address",
+      "Parser.cpp"
+    ],
+    "directory": "/home/lukeisun/Projects/json",
+    "file": "/home/lukeisun/Projects/json/Parser.cpp"
+  }
+]
