@@ -34,9 +34,6 @@ public:
   void lex() {
     Lexer lexer(content);
     this->tokens = lexer.lex();
-    // for (const auto &token : this->tokens.tokens) {
-    //   fmt::println("{} ", token.to_string());
-    // }
   }
   void parse() {
     if (tokens.tokens.empty()) {
