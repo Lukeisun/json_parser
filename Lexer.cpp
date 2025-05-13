@@ -153,8 +153,10 @@ Tokens Lexer::lex() {
     }
     // Number
     case '-':
+      //fallthrough
     default:
-      if (isdigit(curr)) {
+        // TODO: this is lazy, fix at some point cause its not right
+      if (isdigit(curr) || curr == '-') {
         while (isdigit(curr) || curr == '.' || curr == 'e' || curr == 'E' ||
                curr == '+' || curr == '-') {
           this->advance();

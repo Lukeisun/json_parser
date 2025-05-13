@@ -4,31 +4,44 @@
 #include <string_view>
 #include <variant>
 
-void Value::print(int indent) {
-  fmt::print("%{}\t", indent);
+void Value::print(int indent) const {
+  fmt::print("{}", std::string(indent, '\t'));
   std::visit(overloads{
                  [](float v) { fmt::print("{}", v); },
-                 [](std::string_view v) {},
-                 [](std::vector<Value> v) {},
-                 [](bool v) {},
-                 [](std::nullptr_t v) {},
-                 [](Error v) {},
+                 [](std::string_view v) { fmt::print("\"{}\"", v); },
+                 [](std::vector<Value> v) {
+                   fmt::print("[");
+                   for (const auto &ele : v) {
+                     ele.print();
+                     fmt::print(" ,");
+                   }
+                   fmt::print("]");
+                 },
+                 [](bool v) { fmt::print("{}", v ? "true" : "false"); },
+                 [](std::nullptr_t v) { fmt::print("null"); },
+                 [](Error v) { fmt::print("ERROR"); },
+                 [](object_t v) {
+                   fmt::print("{{");
+                   for (const auto &ele : v) {
+                     fmt::print("\"{}\" : ", ele.first);
+                     ele.second.print();
+                     fmt::print(", ");
+                   }
+                   fmt::print("}}");
+                 },
              },
              this->val);
 }
 Value Parser::parse() { return this->elements(); }
 Value Parser::elements() {
-  fmt::println("B {}", this->peek().to_string());
   Value v = this->element();
-  fmt::println("A {}", this->peek().to_string());
-  if (this->peek().tok == Token::TOK::COMMA) {
-    fmt::println("{}", this->advance().to_string());
-    Value rest = this->elements();
-    std::vector<Value> vals{v, rest};
-    return Value(vals);
-  } else {
-    return v;
+  std::vector<Value> maybe_v{v};
+  while (this->peek().tok == Token::TOK::COMMA) {
+    this->advance();
+    Value rest = this->element();
+    maybe_v.push_back(rest);
   }
+  return maybe_v.size() == 1 ? v : Value(maybe_v);
 }
 Value Parser::element() { return this->value(); }
 Value Parser::value() {
@@ -36,11 +49,9 @@ Value Parser::value() {
   fmt::println("Processsing {}", next.to_string());
   switch (next.tok) {
   case Token::TOK::LEFT_SQ:
-    this->object();
-    break;
+    return this->object();
   case Token::TOK::LEFT_BR:
-    this->array();
-    break;
+    return this->array();
   case Token::TOK::TRUE:
     return Value(true);
   case Token::TOK::FALSE:
@@ -50,10 +61,10 @@ Value Parser::value() {
   case Token::TOK::NUMBER:
     // Handle as number rn
     return Value(extract_str(next));
-    break;
-  case Token::TOK::STRING:
-    return Value(extract_str(next));
-    break;
+  case Token::TOK::STRING: {
+    auto sv = extract_str(next);
+    return Value(sv);
+  }
   case Token::TOK::_EOF:
     break;
   case Token::TOK::UNDF:
@@ -66,23 +77,51 @@ Value Parser::value() {
   }
   return Value(Error{});
 }
-Value Parser::object() { return Value(Error{}); }
+Value Parser::object() {
+  if (this->peek().tok == Token::TOK::RIGHT_SQ) {
+    return Value(Value::object_t{});
+  }
+  auto x = this->members();
+  return x;
+}
+Value Parser::members(Value::object_t *root_obj) {
+  Value::object_t object;
+  auto str = this->advance();
+  if (str.tok != Token::TOK::STRING || !this->match(Token::TOK::COLON)) {
+    fmt::println(std::cerr, "ERROR PARSING OBJECT", this->peek().to_string());
+    return Value(Error{});
+  }
+  auto v = this->element();
+  std::string_view name(this->src.begin() + str.offset.first,
+                        this->src.begin() + str.offset.second);
+  auto obj = root_obj ? root_obj : &object;
+  obj->insert({name, v});
+  if (this->peek().tok == Token::TOK::COMMA) {
+    this->advance();
+    return this->members(obj);
+  }
+  if (this->match(Token::TOK::RIGHT_SQ)) {
+    return Value(*obj);
+  }
+  return Value(Error{});
+}
 Value Parser::array() {
-  fmt::println("IN ARRAY");
-  if (this->peek().tok == Token::TOK::RIGHT_BR) {
+  if (this->peek().tok == (Token::TOK::RIGHT_BR)) {
+    this->advance();
     return Value(std::vector<Value>{});
   }
   auto v = this->elements();
   if (!std::holds_alternative<std::vector<Value>>(v.val)) {
     v = Value(std::vector<Value>{v});
   }
-  if (this->peek().tok != Token::TOK::RIGHT_BR) {
+  if (!this->match(Token::TOK::RIGHT_BR)) {
     fmt::println(std::cerr, "ERROR PARSING ARRAY {}", this->peek().to_string());
     return Value(Error{});
   }
   return v;
 }
 
+bool Parser::match(Token::TOK tok) { return this->advance().tok == tok; }
 Token Parser::peek() { return this->tokens[this->pos]; }
 Token Parser::advance() { return this->tokens[this->pos++]; }
 std::string_view Parser::extract_str(Token tok) {

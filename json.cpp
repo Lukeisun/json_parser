@@ -1,9 +1,9 @@
 #include "Lexer.hpp"
+#include "Parser.hpp"
 #include "fmt/base.h"
 #include "fmt/ostream.h"
 #include <cstdlib>
 #include <filesystem>
-#include "Parser.hpp"
 #include <fstream>
 #include <iostream>
 #include <ranges>
@@ -45,6 +45,7 @@ public:
     }
     Parser parser(this->tokens, this->content);
     auto v = parser.parse();
+    fmt::println("idx {}", v.val.index());
     v.print();
   }
 };
