@@ -10,14 +10,21 @@ template <class... Ts> struct overloads : Ts... {
 };
 
 class Value {
+private:
 public:
+  static Value _error;
   typedef std::map<std::string_view, Value> object_t;
-  typedef std::variant<float, std::string_view, std::vector<Value>, bool,
+  typedef std::vector<Value> array_t;
+  typedef std::variant<float, std::string_view, array_t, bool,
                        std::nullptr_t, Error, object_t>
       value_t;
   value_t val;
   Value(value_t val) : val(val) {}
   void print(int indent = 0) const;
+  Value &operator[](std::size_t idx);
+  const Value &operator[](std::size_t idx) const;
+  Value &operator[](std::string_view key);
+  const Value &operator[](std::string_view key) const;
 };
 
 class Parser {

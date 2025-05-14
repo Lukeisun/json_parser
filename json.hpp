@@ -1,19 +1,9 @@
+#pragma once
+
 #include "Lexer.hpp"
 #include "Parser.hpp"
-#include "fmt/base.h"
-#include "fmt/ostream.h"
-#include <cstdlib>
 #include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <ranges>
-#include <string>
-#include <vector>
 
-std::ostream &operator<<(std::ostream &out, Token const &data) {
-  out << data.to_string();
-  return out;
-}
 class JSON {
 private:
 public:
@@ -30,30 +20,20 @@ public:
     content = oss.str();
   }
 
-  JSON(const std::string &content) {}
+  // For now just copy
+  JSON(const std::string &content) : content(content) {}
+
   void lex() {
     Lexer lexer(content);
     this->tokens = lexer.lex();
   }
-  void parse() {
+  Value parse() {
     if (tokens.tokens.empty()) {
       fmt::println(std::cerr, "Please Lex First");
       exit(EXIT_FAILURE);
     }
     Parser parser(this->tokens, this->content);
     auto v = parser.parse();
-    fmt::println("idx {}", v.val.index());
-    v.print();
+    return v;
   }
 };
-
-int main(int argc, char **argv) {
-  if (argc < 2) {
-    fmt::println(std::cerr, "Please provide file");
-    exit(EXIT_FAILURE);
-  }
-  std::filesystem::path path(argv[1]);
-  JSON json(path);
-  json.lex();
-  json.parse();
-}

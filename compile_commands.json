@@ -6,10 +6,10 @@
       "--std=c++23",
       "-g",
       "-fsanitize=address",
-      "json.cpp"
+      "main.cpp"
     ],
     "directory": "/home/lukeisun/Projects/json",
-    "file": "/home/lukeisun/Projects/json/json.cpp"
+    "file": "/home/lukeisun/Projects/json/main.cpp"
   },
   {
     "arguments": [

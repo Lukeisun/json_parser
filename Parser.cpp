@@ -128,3 +128,34 @@ std::string_view Parser::extract_str(Token tok) {
   return std::string_view(this->src.begin() + tok.offset.first,
                           this->src.begin() + tok.offset.second);
 }
+Value Value::_error(Value(Error{}));
+Value &Value::operator[](std::size_t idx) {
+  if (array_t *arr = std::get_if<array_t>(&this->val)) {
+    return (*arr)[idx];
+  }
+  return _error;
+}
+const Value &Value::operator[](std::size_t idx) const {
+  if (const auto *arr = std::get_if<array_t>(&this->val)) {
+    return (*arr)[idx];
+  }
+  return _error;
+}
+Value &Value::operator[](std::string_view key) {
+  if (object_t *map = std::get_if<object_t>(&this->val)) {
+    auto it = map->find(key);
+    if (it != map->end()) {
+      return it->second;
+    }
+  }
+  return _error;
+}
+const Value &Value::operator[](std::string_view key) const {
+  if (const object_t *map = std::get_if<object_t>(&this->val)) {
+    auto it = map->find(key);
+    if (it != map->end()) {
+      return it->second;
+    }
+  }
+  return _error;
+}

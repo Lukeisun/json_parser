@@ -1,5 +1,5 @@
 SRCS += \
-	json.cpp \
+	main.cpp \
 	Lexer.cpp \
 	Parser.cpp
 CFLAGS = --std=c++23 -g -fsanitize=address
