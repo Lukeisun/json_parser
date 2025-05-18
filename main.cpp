@@ -1,8 +1,10 @@
 #include "Lexer.hpp"
-#include "json.hpp"
 #include "Parser.hpp"
 #include "fmt/base.h"
+#include "nlohmann/json.hpp"
 #include "fmt/ostream.h"
+#include "json.hpp"
+#include <chrono>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -18,8 +20,19 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   std::filesystem::path path(argv[1]);
+  auto start = std::chrono::high_resolution_clock::now();
   JSON json(path);
   json.lex();
   auto v = json.parse();
-  v["glossary"]["title"].print();
+  std::cout <<"MY: " << std::chrono::duration_cast<std::chrono::milliseconds>(
+                   std::chrono::high_resolution_clock::now() - start)
+            << "\n";
+  start = std::chrono::high_resolution_clock::now();
+  std::ifstream ifs(argv[1]);
+  nlohmann::json data = nlohmann::json::parse(ifs);
+  std::cout <<"NLOHMANN: " << std::chrono::duration_cast<std::chrono::milliseconds>(
+                   std::chrono::high_resolution_clock::now() - start)
+            << "\n";
+  // v["glossary"]["title"].print();
+  // v[1].print();
 }

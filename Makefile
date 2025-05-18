@@ -2,11 +2,20 @@ SRCS += \
 	main.cpp \
 	Lexer.cpp \
 	Parser.cpp
+OBJECTS=$(patsubst %.cpp,%.o,$(SRCS))
+
+
 CFLAGS = --std=c++23 -g -fsanitize=address
+OUT=jsonp
 
-all:
-	g++ -lfmt ${CFLAGS} -I. ${SRCS}
+all: $(OUT)
 
-gen_cc:
-	bear -- g++ -lfmt ${CFLAGS} ${SRCS}
+$(OUT):$(OBJECTS)
+	g++ ${CFLAGS} -ljsoncpp -lfmt -o $@ $^
+
+%.o:%.cpp
+	g++ ${CFLAGS} -c -o $@ $^
+
+clean:
+	rm -rf $(OUT) $(OBJECTS)
 

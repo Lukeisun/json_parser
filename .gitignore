@@ -1,2 +1,5 @@
 .cache/
 a.out
+jsonp
+*.o
+*.json

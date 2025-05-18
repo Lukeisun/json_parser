@@ -46,7 +46,6 @@ Value Parser::elements() {
 Value Parser::element() { return this->value(); }
 Value Parser::value() {
   auto next = this->advance();
-  fmt::println("Processsing {}", next.to_string());
   switch (next.tok) {
   case Token::TOK::LEFT_SQ:
     return this->object();
